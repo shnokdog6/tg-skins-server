@@ -1,0 +1,25 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Case {
+  id      String   @id @default(auto()) @map("_id") @db.ObjectId
+  name    String
+  image   String
+  cost    Int
+  items   Item[]
+}
+
+model Item {
+  id      String   @id @default(auto()) @map("_id") @db.ObjectId
+  name    String
+  image   String
+  cost    Int
+  case    Case     @relation(fields: [caseId], references: [id])
+  caseId  String   @db.ObjectId
+}
