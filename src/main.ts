@@ -1,13 +1,14 @@
-import { ValidationPipe } from "@nestjs/common";
+import { ValidationPipe, VersioningType } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app/app.module";
-import { join } from "path";
 
 (async function bootstrap() {
     const app = await NestFactory.create(AppModule);
-    app.enableCors({
-        origin: true,
-    });
+    app.setGlobalPrefix("api")
+        .enableCors({
+            origin: true,
+            credentials: true,
+        });
     app.useGlobalPipes(
         new ValidationPipe({
             transform: true,

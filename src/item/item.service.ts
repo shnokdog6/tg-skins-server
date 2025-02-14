@@ -1,10 +1,10 @@
 import { Injectable } from "@nestjs/common";
 import { Case, Item } from "@prisma/client";
-import { GetCaseDto } from "../case/dto/get-case.dto";
 import { UpdateCaseDto } from "../case/dto/update-case.dto";
 import { FileService } from "../file/file.service";
 import { PrismaService } from "../prisma/prisma.service";
 import { CreateItemDto } from "./dto/create-item.dto";
+import { GetItemDto } from "./dto/get-item.dto";
 
 @Injectable()
 export class ItemService {
@@ -13,17 +13,18 @@ export class ItemService {
         private readonly fileService: FileService,
     ) {}
 
-    public getMany(dto: GetCaseDto): Promise<Case[]> {
-        return this.prismaService.case.findMany({
+    public getMany(dto: GetItemDto): Promise<Item[]> {
+        return this.prismaService.item.findMany({
             ...dto,
         });
     }
 
-    public getOne(id: string): Promise<Case | null> {
-        return this.prismaService.case.findUnique({
+    public getOne(id: string): Promise<Item | null> {
+        return this.prismaService.item.findUnique({
             where: {
                 id,
             },
+            include: {},
         });
     }
 
@@ -34,7 +35,7 @@ export class ItemService {
             data: {
                 ...dto,
                 image: filename,
-                cost: +dto.cost
+                cost: +dto.cost,
             },
         });
     }

@@ -8,18 +8,50 @@ datasource db {
 }
 
 model Case {
-  id      String   @id @default(auto()) @map("_id") @db.ObjectId
-  name    String
-  image   String
-  cost    Int
-  items   Item[]
+  id    String @id @default(auto()) @map("_id") @db.ObjectId
+  name  String
+  image String
+  cost  Int
+  items Item[]
 }
 
 model Item {
-  id      String   @id @default(auto()) @map("_id") @db.ObjectId
-  name    String
-  image   String
-  cost    Int
-  case    Case     @relation(fields: [caseId], references: [id])
-  caseId  String   @db.ObjectId
+  id            String          @id @default(auto()) @map("_id") @db.ObjectId
+  name          String
+  image         String
+  cost          Int
+  case          Case            @relation(fields: [caseId], references: [id])
+  caseId        String          @db.ObjectId
+  rarity        Rarity          @relation(fields: [rarityId], references: [id])
+  rarityId      String          @db.ObjectId
+  InventoryItem InventoryItem[]
+}
+
+model Rarity {
+  id    String @id @default(auto()) @map("_id") @db.ObjectId
+  name  String
+  color String
+  Item  Item[]
+}
+
+model User {
+  id         String     @id @default(auto()) @map("_id") @db.ObjectId
+  username   String
+  telegramId Int        @unique
+  inventory  Inventory?
+}
+
+model Inventory {
+  id            String          @id @default(auto()) @map("_id") @db.ObjectId
+  user          User            @relation(fields: [userId], references: [id])
+  userId        String          @unique @db.ObjectId
+  InventoryItem InventoryItem[]
+}
+
+model InventoryItem {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  inventory   Inventory @relation(fields: [inventoryId], references: [id])
+  inventoryId String    @db.ObjectId
+  item        Item      @relation(fields: [itemId], references: [id])
+  itemId      String    @db.ObjectId
 }

@@ -1,21 +1,26 @@
 import {
     Body,
-    Controller, FileTypeValidator,
+    Controller,
+    FileTypeValidator,
     Get,
     Param,
     ParseFilePipe,
     Post,
     Query,
+    Req,
     UploadedFile,
+    UseGuards,
     UseInterceptors,
 } from "@nestjs/common";
-import { Case, Item } from "@prisma/client";
+import { Case } from "@prisma/client";
 import { CaseService } from "./case.service";
 import { CreateCaseDto } from "./dto/create-case.dto";
 import { GetCaseDto } from "./dto/get-case.dto";
-import { FileInterceptor, FilesInterceptor } from "@nestjs/platform-express";
+import { FileInterceptor } from "@nestjs/platform-express";
+import { JwtAccessGuard } from "../auth/strategy/access.strategy";
+import { Request } from "express";
 
-@Controller("case")
+@Controller({ path: "case" })
 export class CaseController {
     constructor(private readonly caseService: CaseService) {
     }
@@ -31,7 +36,7 @@ export class CaseController {
     }
 
     @Get(":id/items")
-    getItems(@Param("id") id: string): Promise<Item[]> {
+    getItems(@Param("id") id: string) {
         return this.caseService.getItems(id);
     }
 
@@ -43,5 +48,14 @@ export class CaseController {
         }),
     ) image: Express.Multer.File): Promise<Case> {
         return this.caseService.create({ ...dto, image });
+    }
+
+    @UseGuards(JwtAccessGuard)
+    @Get(":id/open")
+    open(@Req() req: Request, @Param("id") id: string) {
+        return this.caseService.open({
+            inventoryId: req.user!["inventoryId"],
+            caseId: id
+        });
     }
 }

@@ -10,7 +10,7 @@ export class FileService {
         try {
             const fileExtension = file.originalname.split(".")[1];
             const fileName = `${uuidV4()}.${fileExtension}`;
-            const filePath = resolve(__dirname, "..", "public");
+            const filePath = resolve(__dirname, "..", "..", "public");
             const pathExist = await fsExists(filePath);
 
             if (!pathExist) {

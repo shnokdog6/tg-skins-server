@@ -1,9 +1,12 @@
 import { Injectable } from "@nestjs/common";
-import { Case, Item } from "@prisma/client";
+import { Case } from "@prisma/client";
 import { FileService } from "../file/file.service";
+import { randomNumber } from "../helpers/random";
+import { InventoryService } from "../inventory/inventory.service";
 import { PrismaService } from "../prisma/prisma.service";
 import { CreateCaseDto } from "./dto/create-case.dto";
 import { GetCaseDto } from "./dto/get-case.dto";
+import { OpenCaseDto } from "./dto/open-case.dto";
 import { UpdateCaseDto } from "./dto/update-case.dto";
 
 @Injectable()
@@ -11,6 +14,7 @@ export class CaseService {
     constructor(
         private readonly prismaService: PrismaService,
         private readonly fileService: FileService,
+        private readonly inventoryService: InventoryService,
     ) {}
 
     public getMany(dto: GetCaseDto): Promise<Case[]> {
@@ -28,13 +32,20 @@ export class CaseService {
         });
     }
 
-    public async getItems(id: string): Promise<Item[]> {
+    public async getItems(id: string) {
         const result = await this.prismaService.case.findUnique({
             where: {
                 id,
             },
             include: {
-                items: true,
+                items: {
+                    include: {
+                        rarity: true,
+                    },
+                    omit: {
+                        rarityId: true,
+                    },
+                },
             },
             omit: {
                 id: true,
@@ -44,6 +55,18 @@ export class CaseService {
             },
         });
         return result?.items || [];
+    }
+
+    public async open(dto: OpenCaseDto) {
+        const caseItems = await this.getItems(dto.caseId);
+        const randomIndex = randomNumber(0, caseItems.length - 1);
+
+        await this.inventoryService.addItem({
+            inventoryId: dto.inventoryId,
+            itemId: caseItems[randomIndex].id,
+        });
+
+        return caseItems[randomIndex];
     }
 
     public async create(dto: CreateCaseDto): Promise<Case> {
